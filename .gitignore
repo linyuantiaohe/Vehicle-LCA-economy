@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+vehicle_economy.ipynb
+货运车辆计算.ipynb
