@@ -1,1 +1,2 @@
-language-pack-zh-hans
+language-pack-zh*
+language-support-zh
