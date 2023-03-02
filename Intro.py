@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 from PIL import Image
 
+im = Image.open("logo.png")
 
 st.set_page_config(
     page_title="车辆生命周期评价工具",
-    page_icon="😎",
+    page_icon=im,
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
