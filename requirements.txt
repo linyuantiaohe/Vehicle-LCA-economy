@@ -3,3 +3,8 @@ numpy
 matplotlib
 seaborn
 openpyxl
+pillow
+sys
+os
+pathlib
+
