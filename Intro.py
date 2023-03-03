@@ -22,5 +22,3 @@ st.sidebar.markdown("模型及数据库建设:王歌,晏嘉泽,张禾,毛瑀璇,
 st.sidebar.markdown("欢迎提出意见和建议!")
 st.sidebar.markdown("E-mail: wangge@ncepu.edu.cn")
 st.sidebar.map(pd.DataFrame(pd.Series([40.088243727163956,116.30600799534605],index=['lat', 'lon']),columns=['Ncepu']).T)
-
-

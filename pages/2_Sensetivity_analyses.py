@@ -5,22 +5,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import matplotlib.font_manager as fm
-from PIL import Image
-
 import sys
-import os
 sys.path.append('./header')
 import vehiclelcamodel as vlm
 
-files= os.listdir('./data')
-
-collected_vehicle_type = []
-for file in files: #遍历文件夹
-    if not os.path.isdir(file): #判断是否是文件夹，不是文件夹才打开
-        collected_vehicle_type.append(file[:-5])
-
-im = Image.open("./image/logo.png")
-st.set_page_config(page_icon=im)
+collected_vehicle_type = vlm.get_vehicle_type_data()
 
 fpath = Path("./font/simhei.ttf")
 ffp = fm.FontProperties(fname="./font/simhei.ttf")
@@ -28,8 +17,6 @@ ffp = fm.FontProperties(fname="./font/simhei.ttf")
 #plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
 #plt.rcParams["font.family"] = 'Times New Roman' #for mac os
 #plt.rcParams['axes.unicode_minus']=False
-
-collected_vehicle_type=tuple(collected_vehicle_type)
 
 st.title('燃料电池汽车-参数敏感性分析')
 st.text('@Copyright Email: wangge@ncepu.edu.cn')
@@ -41,6 +28,13 @@ selected_vehicle_type = st.sidebar.selectbox(
     '请选择要分析的车型',
     collected_vehicle_type)
 
+toll_parameter=1
+if selected_vehicle_type=='4.5吨冷链车':
+    cold_truck_toll = st.sidebar.checkbox('是否绿色通道?')
+    st.sidebar.markdown('注:绿色通道车辆免征过路费')
+    if cold_truck_toll:
+        toll_parameter=0
+
 selected_year = st.sidebar.slider('选择基准年份', 2021, 2030, 2021)
 
 df_trip_data=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
@@ -50,7 +44,7 @@ selected_carbon_tax = st.sidebar.number_input('设置碳税（元/吨）,默认�
 
 df_hydrogen=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='燃料电池汽车',index_col=0)
 
-sa_rates=np.array([0+i*0.05 for i in range(22)])
+sa_rates=np.array([0+i*0.05 for i in range(23)])
 
 st.markdown('## 1.针对氢耗水平的敏感性分析')
 st.markdown('基准氢耗:百公里%.2fkg'%df_hydrogen.loc['百公里能耗',selected_year])
@@ -75,6 +69,7 @@ st.pyplot(fig_sa_hydrogen_consumption_rate)
 
 st.markdown('## 2.针对轻量化的敏感性分析')
 st.markdown('随着燃料电池效率的提升,对于配套动力电池容量的需求降低.')
+st.markdown('注:轻量化仅针对货运车辆,对客车影响较小.')
 st.markdown('基准动力电池容量:%.2fkWh'%(df_hydrogen.loc['动力电池容量',selected_year]))
 sa_hydrogen_battery_capacity=sa_rates*(df_hydrogen.loc['动力电池容量',selected_year])
 print(sa_hydrogen_battery_capacity)

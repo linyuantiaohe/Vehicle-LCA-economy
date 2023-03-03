@@ -5,23 +5,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from pathlib import Path
 import matplotlib.font_manager as fm
-from PIL import Image
-
 import sys
-import os
 sys.path.append('./header')
 import vehiclelcamodel as vlm
 
-files= os.listdir('./data')
-
-collected_vehicle_type = []
-for file in files: #遍历文件夹
-    if not os.path.isdir(file): #判断是否是文件夹，不是文件夹才打开
-        collected_vehicle_type.append(file[:-5])
-
-
-im = Image.open("./image/logo.png")
-st.set_page_config(page_icon=im)
+collected_vehicle_type = vlm.get_vehicle_type_data()
 
 fpath = Path("./font/simhei.ttf")
 ffp = fm.FontProperties(fname="./font/simhei.ttf")
@@ -29,9 +17,6 @@ ffp = fm.FontProperties(fname="./font/simhei.ttf")
 #plt.rcParams['font.sans-serif']=['SimHei'] #用来正常显示中文标签
 #plt.rcParams["font.family"] = 'Times New Roman' #for mac os
 #plt.rcParams['axes.unicode_minus']=False
-
-collected_vehicle_type=tuple(collected_vehicle_type)
-
 
 st.title('车辆生命周期评价-实际线路分析')
 st.text('@Copyright Email: wangge@ncepu.edu.cn')
@@ -43,18 +28,22 @@ selected_vehicle_type = st.sidebar.selectbox(
     '请选择要分析的车型',
     collected_vehicle_type)
 
-selected_fuel = st.sidebar.multiselect(
-    '要对比哪几种类型？',
-    ['燃油汽车','电动汽车','燃料电池汽车'],
-    ['燃油汽车','电动汽车','燃料电池汽车'])
+toll_parameter=1
+if selected_vehicle_type=='4.5吨冷链车':
+    cold_truck_toll = st.sidebar.checkbox('是否绿色通道?')
+    st.sidebar.markdown('注:绿色通道车辆免征过路费')
+    if cold_truck_toll:
+        toll_parameter=0
+
+selected_fuel = st.sidebar.multiselect('要对比哪几种类型？',['燃油汽车','电动汽车','燃料电池汽车'],['燃油汽车','电动汽车','燃料电池汽车'])
 
 selected_carbon_tax = st.sidebar.number_input('设置碳税（元/吨）',0,10000,50,format='%d')
 
 st.markdown('## 1. 不同路线的对比')
-st.sidebar.markdown('## 1. 不同路线的对比')
-selected_year = st.sidebar.slider('请选择要分析的年份', 2021, 2030, 2021)
+#st.sidebar.markdown('## 1. 不同路线的对比')
+selected_year = st.slider('请选择要分析的年份', 2021, 2030, 2021)
 
-economy_result,cost_mix_result,emission_result=vlm.compare_vehicle_economy(vehicle_type=selected_vehicle_type,year=selected_year,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True)
+economy_result,cost_mix_result,emission_result=vlm.compare_vehicle_economy(vehicle_type=selected_vehicle_type,year=selected_year,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True,toll_parameter=toll_parameter)
 
 st.markdown('### 1.1 不同路线下的净收益对比')
 fig_net_profit,ax_net_profit=plt.subplots(figsize=(8,4))
@@ -74,8 +63,7 @@ st.download_button(
     label="下载图中数据为CSV格式(GB2312编码)",
     data=csv_net_profit,
     file_name='净利润-%s-%d年-碳税%d元.csv'%(selected_vehicle_type,selected_year,selected_carbon_tax),
-    mime='text/csv',
-)
+    mime='text/csv')
 
 st.markdown('### 1.2 不同路线下的成本结构')
 fig_cost_mix,ax_cost_mix=plt.subplots(1,len(selected_fuel),figsize=(4*len(selected_fuel),4),sharey=True)
@@ -87,9 +75,11 @@ for vt,i in zip(selected_fuel,range(len(selected_fuel))):
     ax_cost_mix[i].set_yticks([0,0.2,0.4,0.6,0.8,1])
     ax_cost_mix[i].set_yticklabels(['0','20%','40%','60%','80%','100%'])
     ax_cost_mix[i].set_xticklabels(df_net_profit.columns,fontproperties = ffp)
-ax_cost_mix[1].legend(loc='upper center',bbox_to_anchor=(0.5,1.25),ncol=6,prop=ffp)
+ax_cost_mix[1].legend(loc='lower center',bbox_to_anchor=(0.5,-0.5),ncol=6,prop=ffp)
 ax_cost_mix[0].set_ylabel('成本占比(%)',font=fpath)
 fig_cost_mix.subplots_adjust(wspace=0.05)
+fig_cost_mix.suptitle('%s-%d年-碳税%d'%(selected_vehicle_type,selected_year,selected_carbon_tax),font=fpath)
+
 
 st.pyplot(fig_cost_mix)
 csv_economy_result = vlm.convert_df(economy_result)
@@ -98,8 +88,7 @@ st.download_button(
     label="下载源数据为CSV格式(GB2312编码)",
     data=csv_economy_result,
     file_name='收益利润源数据-%s-%d年-碳税%d元.csv'%(selected_vehicle_type,selected_year,selected_carbon_tax),
-    mime='text/csv',
-)
+    mime='text/csv')
 
 st.markdown('### 1.3 不同路线下的生命周期碳排放总量')
 fig_emission,ax_emission=plt.subplots(figsize=(8,4))
@@ -118,17 +107,16 @@ st.download_button(
     label="下载图中数据为CSV格式(GB2312编码)",
     data=csv_emission,
     file_name='生命周期碳排放-%s-%d年-碳税%d元/吨.csv'%(selected_vehicle_type,selected_year,selected_carbon_tax),
-    mime='text/csv',
-)
+    mime='text/csv')
 
 st.markdown('## 2. 选定路线下的趋势对比')
 
-st.sidebar.markdown('## 2. 选定路线下的趋势对比')
+#st.sidebar.markdown('## 2. 选定路线下的趋势对比')
 
 df_trip_data=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
-selected_trip = st.sidebar.selectbox('请选择想分析的线路',df_trip_data.index)
+selected_trip = st.selectbox('请选择想分析的线路',df_trip_data.index)
 
-year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip=selected_trip)
+year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip=selected_trip,toll_parameter=toll_parameter)
 
 st.markdown('### 2.1 选定路线下的净收益趋势对比')
 
@@ -150,8 +138,7 @@ st.download_button(
     label="下载图中数据为CSV格式(GB2312编码)",
     data=csv_net_profit_trend,
     file_name='净利润趋势-%s-%s-碳税%d元.csv'%(selected_vehicle_type,selected_trip,selected_carbon_tax),
-    mime='text/csv',
-)
+    mime='text/csv')
 
 st.markdown('### 2.2 选定路线下的成本结构趋势')
 fig_cost_mix_trend,ax_cost_mix_trend=plt.subplots(1,len(selected_fuel),figsize=(4*len(selected_fuel),4),sharey=True)
@@ -166,9 +153,10 @@ for vt,i in zip(selected_fuel,range(len(selected_fuel))):
     ax_cost_mix_trend[i].set_yticklabels(['0','20%','40%','60%','80%','100%'])
     ax_cost_mix_trend[i].set_xticks(range(2021,2031))
     ax_cost_mix_trend[i].set_xticklabels(range(2021,2031),rotation=90)
-ax_cost_mix_trend[1].legend(loc='upper center',bbox_to_anchor=(0.5,1.25),ncol=6,prop=ffp)
+ax_cost_mix_trend[1].legend(loc='lower center',bbox_to_anchor=(0.5,-0.3),ncol=6,prop=ffp)
 ax_cost_mix_trend[0].set_ylabel('成本占比:%',font=fpath)
 fig_cost_mix_trend.subplots_adjust(wspace=0.05)
+fig_cost_mix_trend.suptitle('%s-%s-碳税%d元'%(selected_vehicle_type,selected_trip,selected_carbon_tax),font=fpath)
 
 st.pyplot(fig_cost_mix_trend)
 csv_economy_result_trend = vlm.convert_df(year_economy_result)
@@ -177,8 +165,7 @@ st.download_button(
     label="下载源数据为CSV格式(GB2312编码)",
     data=csv_economy_result_trend,
     file_name='收益利润趋势源数据-%s-%s-碳税%d元.csv'%(selected_vehicle_type,selected_trip,selected_carbon_tax),
-    mime='text/csv',
-)
+    mime='text/csv')
 
 st.markdown('### 2.3 选定路线下的生命周期碳排放总量')
 fig_emission_trend,ax_emission_trend=plt.subplots(figsize=(8,4))
@@ -197,6 +184,4 @@ st.download_button(
     label="下载图中数据为CSV格式(GB2312编码)",
     data=csv_emission_trend,
     file_name='生命周期碳排放趋势-%s-%s-碳税%d元.csv'%(selected_vehicle_type,selected_trip,selected_carbon_tax),
-    mime='text/csv',
-)
-
+    mime='text/csv')
