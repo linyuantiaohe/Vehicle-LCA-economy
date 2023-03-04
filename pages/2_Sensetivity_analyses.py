@@ -28,8 +28,9 @@ selected_vehicle_type = st.sidebar.selectbox(
     '请选择要分析的车型',
     collected_vehicle_type)
 
-full_load_rate = st.sidebar.slider('选择年均负载率(100%为全部满载,0%为全部空载)', 0, 100, 100)/100
-full_work_rate = st.sidebar.slider('选择平均接单率(100%为全部满载,0%为全部空载)', 0, 100, 100)/100
+df_ini_vehicle=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
+full_load_rate = st.sidebar.slider('选择平均负载率(100%为全部满载,0%为全部空载)', 0,100, int(df_ini_vehicle.loc['平均负载率',2021]))/100
+full_work_rate = st.sidebar.slider('选择行驶时间占比(扣除装卸货和接不到单时间)', 0,100, int(df_ini_vehicle.loc['行驶时间占比',2021]))/100
 
 driver_salary_per_month = st.sidebar.checkbox('是否考虑司机工资?')
 if driver_salary_per_month:
