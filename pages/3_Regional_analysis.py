@@ -22,8 +22,19 @@ st.title('车辆生命周期评价-区域分析')
 st.text('@Copyright Email: wangge@ncepu.edu.cn')
 st.text('More data and functions are under construction…')
 
+st.sidebar.markdown('# 选择敏感性分析基准值')
+
 selected_vehicle_type = st.sidebar.selectbox(
     '请选择要分析的车型',collected_vehicle_type)
+
+full_load_rate = st.sidebar.slider('选择年均负载率(100%为全部满载,0%为全部空载)', 0, 100, 100)/100
+full_work_rate = st.sidebar.slider('选择平均接单率(100%为全部满载,0%为全部空载)', 0, 100, 100)/100
+
+driver_salary_per_month = st.sidebar.checkbox('是否考虑司机工资?')
+if driver_salary_per_month:
+    driver_salary_per_month = st.sidebar.number_input('选择司机平均月工资', 2000, 15000, 10000,format='%d')
+else:
+    driver_salary_per_month=0
 
 toll_parameter=1
 if selected_vehicle_type=='4.5吨冷链车':
@@ -51,7 +62,7 @@ st.markdown('## 1.地区对氢-电竞争的影响')
 df_nt_h2ev=pd.Series(0,index=coldmonths.index)
 df_c_h2ev=pd.Series(0,index=coldmonths.index)
 for r in coldmonths.index:
-    economy_result,cost_mix_result,emission_result=vlm.carbon_tax_sensetivity_analysis(carbon_tax=[0],vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,cold_month=coldmonths.loc[r])
+    economy_result,cost_mix_result,emission_result=vlm.carbon_tax_sensetivity_analysis(carbon_tax=[0],vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,cold_month=coldmonths.loc[r],driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
     df_nt_h2ev.loc[r]=(economy_result.sum(axis=1)).loc['燃料电池汽车',0]-(economy_result.sum(axis=1)).loc['电动汽车',0]
 
 st.markdown('氢-电生命周期利润差')
@@ -65,7 +76,7 @@ df_nt_h2oil=pd.DataFrame(0,index=coldmonths.index,columns=sa_carbon_tax)
 df_c_h2oil=pd.DataFrame(0,index=coldmonths.index,columns=sa_carbon_tax)
 
 for r in coldmonths.index:
-    economy_result,cost_mix_result,emission_result=vlm.carbon_tax_sensetivity_analysis(carbon_tax=sa_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,cold_month=coldmonths.loc[r])
+    economy_result,cost_mix_result,emission_result=vlm.carbon_tax_sensetivity_analysis(carbon_tax=sa_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,cold_month=coldmonths.loc[r],driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
     df_nt_h2ev.loc[r]=(economy_result.sum(axis=1)).loc['燃料电池汽车']-(economy_result.sum(axis=1)).loc['电动汽车']
     df_nt_h2oil.loc[r]=(economy_result.sum(axis=1)).loc['燃料电池汽车']-(economy_result.sum(axis=1)).loc['燃油汽车']
 

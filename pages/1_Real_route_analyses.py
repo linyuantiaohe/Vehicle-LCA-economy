@@ -28,6 +28,15 @@ selected_vehicle_type = st.sidebar.selectbox(
     '请选择要分析的车型',
     collected_vehicle_type)
 
+full_load_rate = st.sidebar.slider('选择平均负载率(100%为全部满载,0%为全部空载)', 0, 100, 100)/100
+full_work_rate = st.sidebar.slider('选择平均接单率(100%为全部满载,0%为全部空载)', 0, 100, 100)/100
+
+driver_salary_per_month = st.sidebar.checkbox('是否考虑司机工资?')
+if driver_salary_per_month:
+    driver_salary_per_month = st.sidebar.number_input('选择司机平均月工资', 2000, 15000, 10000,format='%d')
+else:
+    driver_salary_per_month=0
+
 toll_parameter=1
 if selected_vehicle_type=='4.5吨冷链车':
     cold_truck_toll = st.sidebar.checkbox('是否绿色通道?')
@@ -43,7 +52,7 @@ st.markdown('## 1. 不同路线的对比')
 #st.sidebar.markdown('## 1. 不同路线的对比')
 selected_year = st.slider('请选择要分析的年份', 2021, 2030, 2021)
 
-economy_result,cost_mix_result,emission_result=vlm.compare_vehicle_economy(vehicle_type=selected_vehicle_type,year=selected_year,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True,toll_parameter=toll_parameter)
+economy_result,cost_mix_result,emission_result=vlm.compare_vehicle_economy(vehicle_type=selected_vehicle_type,year=selected_year,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True,toll_parameter=toll_parameter,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
 
 st.markdown('### 1.1 不同路线下的净收益对比')
 fig_net_profit,ax_net_profit=plt.subplots(figsize=(8,4))
@@ -116,7 +125,7 @@ st.markdown('## 2. 选定路线下的趋势对比')
 df_trip_data=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
 selected_trip = st.selectbox('请选择想分析的线路',df_trip_data.index)
 
-year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip=selected_trip,toll_parameter=toll_parameter)
+year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip=selected_trip,toll_parameter=toll_parameter,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
 
 st.markdown('### 2.1 选定路线下的净收益趋势对比')
 
