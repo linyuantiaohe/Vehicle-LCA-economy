@@ -27,9 +27,9 @@ def cal_vehicle_life_economy(nev_or_not=False,fuel_capacity=2000.0,body_weight=9
     days_per_trip = hour_per_trip/day_work_hour
     annual_days = pd.Series([12-cold_month, cold_month],index=day_type)/12*365*workday_ratio
     if fixed_trips:
-        annual_trips = annual_days/days_per_trip*full_work_rate
-    else:
         annual_trips = annual_days*trips_every_day
+    else:
+        annual_trips = annual_days/days_per_trip*full_work_rate
     annual_trip_length = annual_trips*trip_length
     annual_energy_consumption = annual_trip_length/100*differnt_day_fuel_rate
     annual_emissions=annual_energy_consumption.sum()*lca_ef/1000
