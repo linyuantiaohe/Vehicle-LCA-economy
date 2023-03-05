@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 vehicle_economy.ipynb
 货运车辆计算.ipynb
+data/.DS_Store
+.DS_Store
+.DS_Store

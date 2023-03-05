@@ -68,7 +68,7 @@ def cal_cost_percent(lca_economy_mix):
     return lca_cost_percentage
 
 @st.cache_data
-def compare_vehicle_economy(vehicle_type='25吨牵引车',year=2021,carbon_tax=50,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1):
+def compare_vehicle_economy(vehicle_type='25吨牵引车',year=2021,carbon_tax=50,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1,ef_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车']),cost_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车'])):
     if year not in np.arange(2021,2031):
         print("Only support calculate year from 2021 to 2030.")
     df_vehicle_om=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
@@ -93,8 +93,9 @@ def compare_vehicle_economy(vehicle_type='25吨牵引车',year=2021,carbon_tax=5
         future_fuel_cost=pd.Series(0,index=range(vehicle_life))
         future_fuel_ef=pd.Series(0,index=range(vehicle_life))
         for y in future_fuel_cost.index:
-            future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-            future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+            #future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+            future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
+            #pass
         nev=True
         bool_of_zh={'是':True,'否':False}
         if ft == '燃油汽车':
@@ -107,7 +108,7 @@ def compare_vehicle_economy(vehicle_type='25吨牵引车',year=2021,carbon_tax=5
     return economy_result,cost_mix_result,emission_result
 
 @st.cache_data
-def economy_trend(vehicle_type='25吨牵引车',carbon_tax=50,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip='上海-北京',toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1):
+def economy_trend(vehicle_type='25吨牵引车',carbon_tax=50,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip='上海-北京',toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1,ef_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车']),cost_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车'])):
     df_vehicle_om=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
     df_trip_data=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
     all_years=np.arange(2021,2031)
@@ -134,8 +135,8 @@ def economy_trend(vehicle_type='25吨牵引车',carbon_tax=50,compare_fuel=['燃
             future_fuel_cost=pd.Series(0,index=range(vehicle_life))
             future_fuel_ef=pd.Series(0,index=range(vehicle_life))
             for y in future_fuel_cost.index:
-                future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-                future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+                future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+                future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
             nev=True
             bool_of_zh={'是':True,'否':False}
             if ft == '燃油汽车':
@@ -162,7 +163,7 @@ def convert_df(df):
     return df.to_csv().encode('gb2312')
 
 @st.cache_data
-def hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=[],lang_ZH_or_not=True,vehicle_type='25吨牵引车',carbon_tax=50,year=2021,trip='上海-北京',toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1):
+def hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=[],lang_ZH_or_not=True,vehicle_type='25吨牵引车',carbon_tax=50,year=2021,trip='上海-北京',toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1,ef_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车']),cost_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车'])):
     df_vehicle_om=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
     df_trip_data=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
     bool_of_zh={'是':True,'否':False}
@@ -186,8 +187,8 @@ def hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=[],lang_
         future_fuel_cost=pd.Series(0,index=range(vehicle_life))
         future_fuel_ef=pd.Series(0,index=range(vehicle_life))
         for y in future_fuel_cost.index:
-            future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-            future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+            future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+            future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
         nev=True
         if ft == '燃油汽车':
             nev=False
@@ -201,8 +202,8 @@ def hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=[],lang_
         future_fuel_cost=pd.Series(0,index=range(vehicle_life))
         future_fuel_ef=pd.Series(0,index=range(vehicle_life))
         for y in future_fuel_cost.index:
-            future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-            future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+            future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+            future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
         nev=True
         sa_economy_result=pd.DataFrame(0,index=sa_consumption_rates,columns=economy_index)
         sa_cost_mix_result=pd.DataFrame(0,index=sa_consumption_rates,columns=economy_index[1:])
@@ -215,7 +216,7 @@ def hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=[],lang_
     return compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result
 
 @st.cache_data
-def hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=[],lang_ZH_or_not=True,vehicle_type='25吨牵引车',carbon_tax=50,year=2021,trip='上海-北京',toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1):
+def hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=[],lang_ZH_or_not=True,vehicle_type='25吨牵引车',carbon_tax=50,year=2021,trip='上海-北京',toll_parameter=1,driver_salary_per_month=0,full_load_rate=1,full_work_rate=1,ef_fuels=pd.DataFrame(),cost_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车'])):
     df_vehicle_om=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
     df_trip_data=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
     bool_of_zh={'是':True,'否':False}
@@ -239,8 +240,8 @@ def hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=[],lang_ZH_or_not
         future_fuel_cost=pd.Series(0,index=range(vehicle_life))
         future_fuel_ef=pd.Series(0,index=range(vehicle_life))
         for y in future_fuel_cost.index:
-            future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-            future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+            future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+            future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
         nev=True
         if ft == '燃油汽车':
             nev=False
@@ -254,8 +255,8 @@ def hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=[],lang_ZH_or_not
         future_fuel_cost=pd.Series(0,index=range(vehicle_life))
         future_fuel_ef=pd.Series(0,index=range(vehicle_life))
         for y in future_fuel_cost.index:
-            future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-            future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+            future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+            future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
         nev=True
         sa_economy_result=pd.DataFrame(0,index=sa_batteery_capacity,columns=economy_index)
         sa_cost_mix_result=pd.DataFrame(0,index=sa_batteery_capacity,columns=economy_index[1:])
@@ -290,7 +291,7 @@ def get_vehicle_type_data():
     return tuple(collected_vehicle_type)
 
 @st.cache_data
-def carbon_tax_sensetivity_analysis(carbon_tax=[],lang_ZH_or_not=True,vehicle_type='25吨牵引车',year=2021,trip='上海-北京',toll_parameter=1,cold_month=0,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],driver_salary_per_month=0,full_load_rate=1,full_work_rate=1):
+def carbon_tax_sensetivity_analysis(carbon_tax=[],lang_ZH_or_not=True,vehicle_type='25吨牵引车',year=2021,trip='上海-北京',toll_parameter=1,cold_month=0,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],driver_salary_per_month=0,full_load_rate=1,full_work_rate=1,ef_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车']),cost_fuels=pd.DataFrame(index=['燃油汽车','电动汽车','燃料电池汽车'])):
     if year not in np.arange(2021,2031):
         print("Only support calculate year from 2021 to 2030.")
     df_vehicle_om=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
@@ -315,8 +316,8 @@ def carbon_tax_sensetivity_analysis(carbon_tax=[],lang_ZH_or_not=True,vehicle_ty
         future_fuel_cost=pd.Series(0,index=range(vehicle_life))
         future_fuel_ef=pd.Series(0,index=range(vehicle_life))
         for y in future_fuel_cost.index:
-            future_fuel_cost.loc[y]=df_vehicle.loc['燃料价格',year+y]
-            future_fuel_ef.loc[y]=df_vehicle.loc['燃料生命周期排放因子',year+y]
+            future_fuel_cost.loc[y]=cost_fuels.loc[ft,year+y]
+            future_fuel_ef.loc[y]=ef_fuels.loc[ft,year+y]
         nev=True
         bool_of_zh={'是':True,'否':False}
         if ft == '燃油汽车':
@@ -328,3 +329,26 @@ def carbon_tax_sensetivity_analysis(carbon_tax=[],lang_ZH_or_not=True,vehicle_ty
                 cost_mix_result.loc[ft,ct]=cal_cost_percent(lca_economy_mix)
                 emission_result.loc[ft,ct]=lca_emissions
     return economy_result,cost_mix_result,emission_result
+
+def select_fuels():
+    with st.expander('选择燃料种类', expanded=True):
+        ef_oil_fuel=pd.read_excel('./fuel/燃料碳排放强度.xlsx',sheet_name='燃油汽车',index_col=0)
+        ef_ev_fuel=pd.read_excel('./fuel/燃料碳排放强度.xlsx',sheet_name='电动汽车',index_col=0)
+        ef_fcv_fuel=pd.read_excel('./fuel/燃料碳排放强度.xlsx',sheet_name='燃料电池汽车',index_col=0)
+        cost_oil_fuel=pd.read_excel('./fuel/燃料成本.xlsx',sheet_name='燃油汽车',index_col=0)
+        cost_ev_fuel=pd.read_excel('./fuel/燃料成本.xlsx',sheet_name='电动汽车',index_col=0)
+        cost_fcv_fuel=pd.read_excel('./fuel/燃料成本.xlsx',sheet_name='燃料电池汽车',index_col=0)
+        ef_col1, ef_col2, ef_col3 = st.columns(3)
+        with ef_col1:
+            oils = st.selectbox('请选择燃油汽车燃料:',ef_oil_fuel.index)
+            st.markdown('%s当前碳排放强度为%.2f %s'%(oils,ef_oil_fuel.loc[oils,2021],ef_oil_fuel.loc[oils,'单位']))
+        with ef_col2:
+            powers = st.selectbox('请选择电动汽车燃料',ef_ev_fuel.index)
+            st.markdown('%s当前碳排放强度为%.2f %s'%(powers,ef_ev_fuel.loc[powers,2021],ef_ev_fuel.loc[powers,'单位']))
+        with ef_col3:
+            hydrogens = st.selectbox('请选择燃料电池汽车燃料',ef_fcv_fuel.index)
+            st.markdown('%s当前碳排放强度为%.2f %s'%(hydrogens,ef_fcv_fuel.loc[hydrogens,2021],ef_fcv_fuel.loc[hydrogens,'单位']))
+        efs=pd.DataFrame([ef_oil_fuel.loc[oils],ef_ev_fuel.loc[powers],ef_fcv_fuel.loc[hydrogens]],index=['燃油汽车','电动汽车','燃料电池汽车'])
+        costs=pd.DataFrame([cost_oil_fuel.loc[oils],cost_ev_fuel.loc[powers],cost_fcv_fuel.loc[hydrogens]],index=['燃油汽车','电动汽车','燃料电池汽车'])
+        return efs,costs
+

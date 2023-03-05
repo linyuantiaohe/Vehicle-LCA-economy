@@ -22,6 +22,8 @@ st.title('燃料电池汽车-参数敏感性分析')
 st.text('@Copyright Email: wangge@ncepu.edu.cn')
 st.text('More data and functions are under construction…')
 
+ef_fuels,cost_fuels=vlm.select_fuels()
+
 st.sidebar.markdown('# 选择敏感性分析基准值')
 
 selected_vehicle_type = st.sidebar.selectbox(
@@ -60,7 +62,7 @@ st.markdown('## 1.针对氢耗水平的敏感性分析')
 st.markdown('基准氢耗:百公里%.2fkg'%df_hydrogen.loc['百公里能耗',selected_year])
 sa_hydrogen_consum_rates=sa_rates*df_hydrogen.loc['百公里能耗',selected_year]
 
-compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=sa_hydrogen_consum_rates,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
+compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=sa_hydrogen_consum_rates,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels)
 
 fig_sa_hydrogen_consumption_rate,ax_sa_hydrogen_consumption_rate=plt.subplots(figsize=(6,4))
 (sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_hydrogen_consumption_rate,label='燃料电池汽车')
@@ -84,7 +86,7 @@ st.markdown('基准动力电池容量:%.2fkWh'%(df_hydrogen.loc['动力电池容
 sa_hydrogen_battery_capacity=sa_rates*(df_hydrogen.loc['动力电池容量',selected_year])
 print(sa_hydrogen_battery_capacity)
 
-compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=sa_hydrogen_battery_capacity,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
+compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=sa_hydrogen_battery_capacity,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels)
 
 fig_sa_hydrogen_battery_capacity,ax_sa_battery_capacity=plt.subplots(figsize=(6,4))
 (sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_battery_capacity,label='燃料电池汽车')

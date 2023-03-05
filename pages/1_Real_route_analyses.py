@@ -22,6 +22,8 @@ st.title('车辆生命周期评价-实际线路分析')
 st.text('@Copyright Email: wangge@ncepu.edu.cn')
 st.text('More data and functions are under construction…')
 
+ef_fuels,cost_fuels=vlm.select_fuels()
+
 st.sidebar.markdown('# 可选项')
 
 selected_vehicle_type = st.sidebar.selectbox(
@@ -53,7 +55,7 @@ st.markdown('## 1. 不同路线的对比')
 #st.sidebar.markdown('## 1. 不同路线的对比')
 selected_year = st.slider('请选择要分析的年份', 2021, 2030, 2021)
 
-economy_result,cost_mix_result,emission_result=vlm.compare_vehicle_economy(vehicle_type=selected_vehicle_type,year=selected_year,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True,toll_parameter=toll_parameter,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
+economy_result,cost_mix_result,emission_result=vlm.compare_vehicle_economy(vehicle_type=selected_vehicle_type,year=selected_year,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True,toll_parameter=toll_parameter,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels)
 
 st.markdown('### 1.1 不同路线下的净收益对比')
 fig_net_profit,ax_net_profit=plt.subplots(figsize=(8,4))
@@ -126,7 +128,7 @@ st.markdown('## 2. 选定路线下的趋势对比')
 df_trip_data=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
 selected_trip = st.selectbox('请选择想分析的线路',df_trip_data.index)
 
-year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip=selected_trip,toll_parameter=toll_parameter,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
+year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=['燃油汽车','电动汽车','燃料电池汽车'],lang_ZH_or_not=True,trip=selected_trip,toll_parameter=toll_parameter,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels)
 
 st.markdown('### 2.1 选定路线下的净收益趋势对比')
 
