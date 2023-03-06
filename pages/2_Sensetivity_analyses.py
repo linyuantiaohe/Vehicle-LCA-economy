@@ -22,7 +22,7 @@ st.title('燃料电池汽车-参数敏感性分析')
 st.text('@Copyright Email: wangge@ncepu.edu.cn')
 st.text('More data and functions are under construction…')
 
-ef_fuels,cost_fuels=vlm.select_fuels()
+ef_fuels,cost_fuels,charge_speeds=vlm.select_fuels()
 
 st.sidebar.markdown('# 选择敏感性分析基准值')
 
@@ -42,7 +42,7 @@ else:
 
 toll_parameter=1
 if selected_vehicle_type=='4.5吨冷链车':
-    cold_truck_toll = st.sidebar.checkbox('是否绿色通道?')
+    cold_truck_toll = st.sidebar.checkbox('是否绿色通道?',value=True)
     st.sidebar.markdown('注:绿色通道车辆免征过路费')
     if cold_truck_toll:
         toll_parameter=0
@@ -62,7 +62,8 @@ st.markdown('## 1.针对氢耗水平的敏感性分析')
 st.markdown('基准氢耗:百公里%.2fkg'%df_hydrogen.loc['百公里能耗',selected_year])
 sa_hydrogen_consum_rates=sa_rates*df_hydrogen.loc['百公里能耗',selected_year]
 
-compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=sa_hydrogen_consum_rates,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels)
+##函数使用
+compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=sa_hydrogen_consum_rates,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
 
 fig_sa_hydrogen_consumption_rate,ax_sa_hydrogen_consumption_rate=plt.subplots(figsize=(6,4))
 (sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_hydrogen_consumption_rate,label='燃料电池汽车')
@@ -84,9 +85,9 @@ st.markdown('随着燃料电池效率的提升,对于配套动力电池容量的
 st.markdown('注:轻量化仅针对货运车辆,对客车影响较小.')
 st.markdown('基准动力电池容量:%.2fkWh'%(df_hydrogen.loc['动力电池容量',selected_year]))
 sa_hydrogen_battery_capacity=sa_rates*(df_hydrogen.loc['动力电池容量',selected_year])
-print(sa_hydrogen_battery_capacity)
 
-compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=sa_hydrogen_battery_capacity,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels)
+##函数使用
+compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=sa_hydrogen_battery_capacity,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
 
 fig_sa_hydrogen_battery_capacity,ax_sa_battery_capacity=plt.subplots(figsize=(6,4))
 (sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_battery_capacity,label='燃料电池汽车')
@@ -110,3 +111,34 @@ ax_only_hydrogen.set_xlabel('燃料电池汽车配套动力电池容量:kWh',fon
 ax_only_hydrogen.set_title('%s-%s-碳税%d元-配套动力电池容量敏感性(仅燃料电池车)'%(selected_vehicle_type,selected_trip,selected_carbon_tax),font=fpath)
 ax_only_hydrogen.grid()
 st.pyplot(fig_only_hydrogen)
+
+st.markdown('## 3.针对燃料电池汽车购置成本的敏感性分析')
+st.markdown('用于检验燃料电池汽车购置成本补贴的政策效果.')
+st.markdown('基准购置成本:%.1f万元'%(df_hydrogen.loc['购置成本',selected_year]/10000))
+base_capital_cost=df_hydrogen.loc['购置成本',selected_year]/10000
+for step in range(11):
+    if 20*step>base_capital_cost:
+        break
+    else:
+        continue
+sa_hydrogen_capital_cost=np.array([step*i for i in range(23)])
+
+print(sa_hydrogen_capital_cost)
+
+##函数使用
+cc_compare_fuel_economy_result,cc_compare_fuel_cost_mix_result,cc_compare_fuel_emission_result,cc_sa_economy_result,cc_sa_cost_mix_result,cc_sa_emission_result=vlm.capital_cost_sensetivity_analysis(sa_capital_cost=sa_hydrogen_capital_cost,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
+
+fig_sa_hydrogen_capital_cost,ax_sa_hydrogen_capital_cost=plt.subplots(figsize=(6,4))
+(cc_sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_hydrogen_capital_cost,label='燃料电池汽车')
+
+for ft in cc_compare_fuel_economy_result.index:
+    ax_sa_hydrogen_capital_cost.plot([0,10000],[cc_compare_fuel_economy_result.loc[ft].sum()/10000,cc_compare_fuel_economy_result.loc[ft].sum()/10000],'-',label=ft)
+ax_sa_hydrogen_capital_cost.set_xlim(sa_hydrogen_capital_cost.min(),sa_hydrogen_capital_cost.max())
+ax_sa_hydrogen_capital_cost.set_ylim(vlm.axis_lim(cc_compare_fuel_economy_result.sum(axis=1)/10000,cc_sa_economy_result.sum(axis=1)/10000,100))
+ax_sa_hydrogen_capital_cost.plot([df_hydrogen.loc['购置成本',selected_year]/10000,df_hydrogen.loc['购置成本',selected_year]/10000],[-10000,10000],'--',label='当前购置成本')
+ax_sa_hydrogen_capital_cost.legend(loc='right',bbox_to_anchor=(1.32,0.5),prop=ffp)
+ax_sa_hydrogen_capital_cost.set_ylabel('净利润:万元',font=fpath)
+ax_sa_hydrogen_capital_cost.set_xlabel('燃料电池汽车购置成本:万元',font=fpath)
+ax_sa_hydrogen_capital_cost.set_title('%s-%s-碳税%d元-燃料电池汽车购置成本敏感性'%(selected_vehicle_type,selected_trip,selected_carbon_tax),font=fpath)
+ax_sa_hydrogen_capital_cost.grid()
+st.pyplot(fig_sa_hydrogen_capital_cost)
