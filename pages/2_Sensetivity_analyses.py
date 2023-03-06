@@ -71,7 +71,7 @@ fig_sa_hydrogen_consumption_rate,ax_sa_hydrogen_consumption_rate=plt.subplots(fi
 for ft in compare_fuel_economy_result.index:
     ax_sa_hydrogen_consumption_rate.plot([0,10000],[compare_fuel_economy_result.loc[ft].sum()/10000,compare_fuel_economy_result.loc[ft].sum()/10000],'-',label=ft)
 ax_sa_hydrogen_consumption_rate.set_xlim(sa_hydrogen_consum_rates.min(),sa_hydrogen_consum_rates.max())
-ax_sa_hydrogen_consumption_rate.set_ylim(vlm.axis_lim(compare_fuel_economy_result.sum(axis=1)/10000,sa_economy_result.sum(axis=1)/10000,100))
+ax_sa_hydrogen_consumption_rate.set_ylim(vlm.axis_lim(compare_fuel_economy_result.sum(axis=1)/10000,sa_economy_result.sum(axis=1)/10000,20))
 ax_sa_hydrogen_consumption_rate.plot([df_hydrogen.loc['百公里能耗',selected_year],df_hydrogen.loc['百公里能耗',selected_year]],[-10000,10000],'--',label='当前氢耗水平')
 ax_sa_hydrogen_consumption_rate.legend(loc='right',bbox_to_anchor=(1.32,0.5),prop=ffp)
 ax_sa_hydrogen_consumption_rate.set_ylabel('净利润:万元',font=fpath)
@@ -95,7 +95,7 @@ fig_sa_hydrogen_battery_capacity,ax_sa_battery_capacity=plt.subplots(figsize=(6,
 for ft in compare_fuel_economy_result.index:
     ax_sa_battery_capacity.plot([0,10000],[compare_fuel_economy_result.loc[ft].sum()/10000,compare_fuel_economy_result.loc[ft].sum()/10000],'-',label=ft)
 ax_sa_battery_capacity.set_xlim(sa_hydrogen_battery_capacity.min(),sa_hydrogen_battery_capacity.max())
-ax_sa_battery_capacity.set_ylim(vlm.axis_lim(compare_fuel_economy_result.sum(axis=1)/10000,sa_economy_result.sum(axis=1)/10000,100))
+ax_sa_battery_capacity.set_ylim(vlm.axis_lim(compare_fuel_economy_result.sum(axis=1)/10000,sa_economy_result.sum(axis=1)/10000,20))
 ax_sa_battery_capacity.plot([df_hydrogen.loc['动力电池容量',selected_year],df_hydrogen.loc['动力电池容量',selected_year]],[-10000,10000],'--',label='当前配套容量')
 ax_sa_battery_capacity.legend(loc='right',bbox_to_anchor=(1.32,0.5),prop=ffp)
 ax_sa_battery_capacity.set_ylabel('净利润:万元',font=fpath)
@@ -134,7 +134,7 @@ fig_sa_hydrogen_capital_cost,ax_sa_hydrogen_capital_cost=plt.subplots(figsize=(6
 for ft in cc_compare_fuel_economy_result.index:
     ax_sa_hydrogen_capital_cost.plot([0,10000],[cc_compare_fuel_economy_result.loc[ft].sum()/10000,cc_compare_fuel_economy_result.loc[ft].sum()/10000],'-',label=ft)
 ax_sa_hydrogen_capital_cost.set_xlim(sa_hydrogen_capital_cost.min(),sa_hydrogen_capital_cost.max())
-ax_sa_hydrogen_capital_cost.set_ylim(vlm.axis_lim(cc_compare_fuel_economy_result.sum(axis=1)/10000,cc_sa_economy_result.sum(axis=1)/10000,100))
+ax_sa_hydrogen_capital_cost.set_ylim(vlm.axis_lim(cc_compare_fuel_economy_result.sum(axis=1)/10000,cc_sa_economy_result.sum(axis=1)/10000,20))
 ax_sa_hydrogen_capital_cost.plot([df_hydrogen.loc['购置成本',selected_year]/10000,df_hydrogen.loc['购置成本',selected_year]/10000],[-10000,10000],'--',label='当前购置成本')
 ax_sa_hydrogen_capital_cost.legend(loc='right',bbox_to_anchor=(1.32,0.5),prop=ffp)
 ax_sa_hydrogen_capital_cost.set_ylabel('净利润:万元',font=fpath)

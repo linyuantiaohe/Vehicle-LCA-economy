@@ -275,14 +275,14 @@ def hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=[],lang_ZH_or_not
 def axis_lim(list1,list2,rounds):
     vmin=min(min(list1),min(list2))
     if vmin<0:
-        vmin=(int(vmin/rounds)-1)*rounds
+        vmin=(int(vmin/rounds)-2)*rounds
     else:
-        vmin=(int(vmin/rounds))*rounds
+        vmin=(int(vmin/rounds)-1)*rounds
     vmax=max(max(list1),max(list2))
     if vmax<0:
-        vmax=(int(vmax/rounds))*rounds
-    else:
         vmax=(int(vmax/rounds)+1)*rounds
+    else:
+        vmax=(int(vmax/rounds)+2)*rounds
     return vmin,vmax
 
 @st.cache_data
