@@ -131,7 +131,6 @@ selected_trip = st.selectbox('请选择想分析的线路',df_trip_data.index)
 
 ##函数使用
 year_economy_result,year_cost_mix_result,year_emission_result=vlm.economy_trend(vehicle_type=selected_vehicle_type,carbon_tax=selected_carbon_tax,compare_fuel=selected_fuel,lang_ZH_or_not=True,trip=selected_trip,toll_parameter=toll_parameter,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
-
 st.markdown('### 2.1 选定路线下的净收益趋势对比')
 
 fig_net_profit_trend,ax_net_profit_trend=plt.subplots(figsize=(8,4))

@@ -130,9 +130,9 @@ def economy_trend(vehicle_type='25吨牵引车',carbon_tax=50,compare_fuel=['燃
     cost_mix_result=pd.DataFrame(0,index=vehicle_and_year,columns=economy_index[1:])
     emission_result=pd.DataFrame(0,index=compare_fuel,columns=all_years)
 
-    for year in all_years:
-        for ft in compare_fuel:
-            df_vehicle=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name=ft,index_col=0)
+    for ft in compare_fuel:
+        df_vehicle=pd.read_excel('./data/'+vehicle_type+'.xlsx',sheet_name=ft,index_col=0)
+        for year in all_years:
             vehicle_life=int(df_vehicle_om.loc['车辆寿命',year])
             future_fuel_cost=pd.Series(0,index=range(vehicle_life))
             future_fuel_ef=pd.Series(0,index=range(vehicle_life))
@@ -143,7 +143,7 @@ def economy_trend(vehicle_type='25吨牵引车',carbon_tax=50,compare_fuel=['燃
             bool_of_zh={'是':True,'否':False}
             if ft == '燃油汽车':
                 nev=False
-            lca_economy_mix,lca_emissions=cal_vehicle_life_economy(nev_or_not=nev,fuel_capacity=df_vehicle.loc['载能容量',year],body_weight=df_vehicle.loc['车身质量',year],battery_weight=df_vehicle.loc['电池质量',year],capital_cost=df_vehicle.loc['购置成本',year],fuel_consumption_rate=df_vehicle.loc['百公里能耗',year],life_fuel_price=future_fuel_cost,cold_fuel_rate=df_vehicle.loc['低温能耗率',year],charge_speed=charge_speeds.loc[ft,year],lca_ef=future_fuel_ef,insurance_per_year=df_vehicle.loc['单年保险费',year],maintainance_per_km=df_vehicle.loc['保养费用',year],maintainance_per_year=df_vehicle.loc['单年维修费',year],discount_rate=df_vehicle_om.loc['折现率',year],vehicle_life=vehicle_life,workday_ratio=df_vehicle_om.loc['工作日占比',year],workhour_per_driver=df_vehicle_om.loc['单人工作时间',year],number_of_driver=df_vehicle_om.loc['司机人数',year],driver_salary_per_month=driver_salary_per_month,average_speed=df_vehicle_om.loc['平均行驶速度',year],toll_per_km=df_vehicle_om.loc['通行费',year],toll_parameter=toll_parameter,tier_per_km=df_vehicle_om.loc['轮胎损耗',year],allowed_weight=df_vehicle_om.loc['额定总重',year],cold_month=df_trip_data.loc[trip,'寒冷月'],trip_length=df_trip_data.loc[trip,'距离'],freight_or_not=bool_of_zh[df_trip_data.loc[trip,'是否货运']],average_weight_price=df_trip_data.loc[trip,'单位运价'],average_income_per_trip=df_trip_data.loc[trip,'整车运价'],carbon_tax=carbon_tax,lang_ZH_or_not=lang_ZH_or_not,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
+            lca_economy_mix,lca_emissions=cal_vehicle_life_economy(nev_or_not=nev,fuel_capacity=df_vehicle.loc['载能容量',year],body_weight=df_vehicle.loc['车身质量',year],battery_weight=df_vehicle.loc['电池质量',year],capital_cost=df_vehicle.loc['购置成本',year],fuel_consumption_rate=df_vehicle.loc['百公里能耗',year],life_fuel_price=future_fuel_cost,cold_fuel_rate=df_vehicle.loc['低温能耗率',year],charge_speed=charge_speeds.loc[ft,year],lca_ef=future_fuel_ef,insurance_per_year=df_vehicle.loc['单年保险费',year],maintainance_per_km=df_vehicle.loc['保养费用',year],maintainance_per_year=df_vehicle.loc['单年维修费',year],discount_rate=df_vehicle_om.loc['折现率',year],vehicle_life=vehicle_life,workday_ratio=df_vehicle_om.loc['工作日占比',year],workhour_per_driver=df_vehicle_om.loc['单人工作时间',year],number_of_driver=df_vehicle_om.loc['司机人数',year],driver_salary_per_month=driver_salary_per_month,average_speed=df_vehicle_om.loc['平均行驶速度',year],toll_per_km=df_vehicle_om.loc['通行费',year],toll_parameter=toll_parameter,tier_per_km=df_vehicle_om.loc['轮胎损耗',year],allowed_weight=df_vehicle_om.loc['额定总重',year],cold_month=df_trip_data.loc[trip,'寒冷月'],trip_length=df_trip_data.loc[trip,'距离'],freight_or_not=bool_of_zh[df_trip_data.loc[trip,'是否货运']],fixed_trips=bool_of_zh[df_trip_data.loc[trip,'是否固定趟数']],trips_every_day=df_trip_data.loc[trip,'每日固定趟数'],average_weight_price=df_trip_data.loc[trip,'单位运价'],average_income_per_trip=df_trip_data.loc[trip,'整车运价'],carbon_tax=carbon_tax,lang_ZH_or_not=lang_ZH_or_not,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
             economy_result.loc[ft,year]=lca_economy_mix
             cost_mix_result.loc[ft,year]=cal_cost_percent(lca_economy_mix)
             emission_result.loc[ft,year]=lca_emissions
