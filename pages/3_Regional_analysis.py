@@ -71,7 +71,7 @@ for r in coldmonths.index:
 
 st.markdown('氢-电生命周期利润差')
 st.bar_chart(df_nt_h2ev/10000)
-#df_nt_h2ev.to_csv('%s-%s-%d.csv'%(selected_vehicle_type,selected_trip,selected_year))
+#df_nt_h2ev.to_csv('%s-%d.csv'%(selected_vehicle_type,selected_trip,selected_year))
 
 
 st.markdown('## 2.碳税对氢-油竞争的影响')
