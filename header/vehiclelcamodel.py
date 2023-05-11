@@ -4,7 +4,8 @@ import numpy as np
 import os
 
 @st.cache_data
-def cal_vehicle_life_economy(nev_or_not=False,fuel_capacity=2000.0,body_weight=9000.0,battery_weight=0,capital_cost=397097.1676709765,fuel_consumption_rate=35,life_fuel_price=pd.Series(8.145,index=range(5)),cold_fuel_rate=1,charge_speed=6000,lca_ef=pd.Series(2.63,index=range(5)),insurance_per_year=5000,maintainance_per_km=0.2,maintainance_per_year=2000,discount_rate=0.06,vehicle_life=5,workday_ratio=0.8,workhour_per_driver=8,number_of_driver=1,driver_salary_per_month=10000,average_speed=60,toll_per_km=2,toll_parameter=1,tier_per_km=0.12,allowed_weight=49,cold_month=2,trip_length=4164.711,freight_or_not=True,average_weight_price=0.202615099,average_income_per_trip=25315,fixed_trips=False,trips_every_day=2,carbon_tax=50,lang_ZH_or_not=True,full_load_rate=1,full_work_rate=1):
+def cal_vehicle_life_economy(nev_or_not=False,fuel_capacity=2000.0,body_weight=9000.0,battery_weight=0,
+saved_battery_cost=0,capital_cost=397097.1676709765,fuel_consumption_rate=35,life_fuel_price=pd.Series(8.145,index=range(5)),cold_fuel_rate=1,charge_speed=6000,lca_ef=pd.Series(2.63,index=range(5)),insurance_per_year=5000,maintainance_per_km=0.2,maintainance_per_year=2000,discount_rate=0.06,vehicle_life=5,workday_ratio=0.8,workhour_per_driver=8,number_of_driver=1,driver_salary_per_month=10000,average_speed=60,toll_per_km=2,toll_parameter=1,tier_per_km=0.12,allowed_weight=49,cold_month=2,trip_length=4164.711,freight_or_not=True,average_weight_price=0.202615099,average_income_per_trip=25315,fixed_trips=False,trips_every_day=2,carbon_tax=50,lang_ZH_or_not=True,full_load_rate=1,full_work_rate=1):
     day_type=['常温','低温']
     life_cycle_dr=[]
     for i in range(vehicle_life):
@@ -55,13 +56,13 @@ def cal_vehicle_life_economy(nev_or_not=False,fuel_capacity=2000.0,body_weight=9
             economy_index=['收入','购置成本','补能成本','过路费','维修保险费','司机工资','碳税']
         else:
             economy_index=['Income','Capital cost','Fuel cost','Toll','Maintaince and Insurance','Driver salary','Carbon tax']
-        lca_economy_mix=pd.Series([lca_income,-capital_cost,-lca_fuel_cost,-lca_toll,-lca_maintaince_insurance,-lca_driver_cost,-lca_carbon_tax],index=economy_index)
+        lca_economy_mix=pd.Series([lca_income,-capital_cost+saved_battery_cost,-lca_fuel_cost,-lca_toll,-lca_maintaince_insurance,-lca_driver_cost,-lca_carbon_tax],index=economy_index)
     elif driver_salary_per_month==0:
         if lang_ZH_or_not:
             economy_index=['收入','购置成本','补能成本','过路费','维修保险费','碳税']
         else:
             economy_index=['Income','Capital cost','Fuel cost','Toll','Maintaince and Insurance','Carbon tax']
-        lca_economy_mix=pd.Series([lca_income,-capital_cost,-lca_fuel_cost,-lca_toll,-lca_maintaince_insurance,-lca_carbon_tax],index=economy_index)
+        lca_economy_mix=pd.Series([lca_income,-capital_cost+saved_battery_cost,-lca_fuel_cost,-lca_toll,-lca_maintaince_insurance,-lca_carbon_tax],index=economy_index)
     return lca_economy_mix,lca_emissions
 
 @st.cache_data
@@ -266,7 +267,8 @@ def hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=[],lang_ZH_or_not
         sa_cost_mix_result=pd.DataFrame(0,index=sa_batteery_capacity,columns=economy_index[1:])
         sa_emission_result=pd.Series(0,index=sa_batteery_capacity)
         for bat in sa_batteery_capacity:
-            lca_economy_mix,lca_emissions=cal_vehicle_life_economy(nev_or_not=nev,fuel_capacity=df_vehicle.loc['载能容量',year],body_weight=df_vehicle.loc['车身质量',year],battery_weight=bat*df_vehicle.loc['动力电池能量密度',year],capital_cost=df_vehicle.loc['购置成本',year],fuel_consumption_rate=df_vehicle.loc['百公里能耗',year],life_fuel_price=future_fuel_cost,cold_fuel_rate=df_vehicle.loc['低温能耗率',year],charge_speed=charge_speeds.loc[ft,year],lca_ef=future_fuel_ef,insurance_per_year=df_vehicle.loc['单年保险费',year],maintainance_per_km=df_vehicle.loc['保养费用',year],maintainance_per_year=df_vehicle.loc['单年维修费',year],discount_rate=df_vehicle_om.loc['折现率',year],vehicle_life=vehicle_life,workday_ratio=df_vehicle_om.loc['工作日占比',year],workhour_per_driver=df_vehicle_om.loc['单人工作时间',year],number_of_driver=df_vehicle_om.loc['司机人数',year],driver_salary_per_month=driver_salary_per_month,average_speed=df_vehicle_om.loc['平均行驶速度',year],toll_per_km=df_vehicle_om.loc['通行费',year],toll_parameter=toll_parameter,tier_per_km=df_vehicle_om.loc['轮胎损耗',year],allowed_weight=df_vehicle_om.loc['额定总重',year],cold_month=df_trip_data.loc[trip,'寒冷月'],trip_length=df_trip_data.loc[trip,'距离'],freight_or_not=bool_of_zh[df_trip_data.loc[trip,'是否货运']],average_weight_price=df_trip_data.loc[trip,'单位运价'],average_income_per_trip=df_trip_data.loc[trip,'整车运价'],carbon_tax=carbon_tax,lang_ZH_or_not=lang_ZH_or_not,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
+            saved_battrey_cost=df_vehicle.loc['动力电池单位成本',year]*(df_vehicle.loc['动力电池容量',year]-bat)
+            lca_economy_mix,lca_emissions=cal_vehicle_life_economy(nev_or_not=nev,fuel_capacity=df_vehicle.loc['载能容量',year],body_weight=df_vehicle.loc['车身质量',year],battery_weight=bat*df_vehicle.loc['动力电池能量密度',year],saved_battery_cost=saved_battrey_cost,capital_cost=df_vehicle.loc['购置成本',year],fuel_consumption_rate=df_vehicle.loc['百公里能耗',year],life_fuel_price=future_fuel_cost,cold_fuel_rate=df_vehicle.loc['低温能耗率',year],charge_speed=charge_speeds.loc[ft,year],lca_ef=future_fuel_ef,insurance_per_year=df_vehicle.loc['单年保险费',year],maintainance_per_km=df_vehicle.loc['保养费用',year],maintainance_per_year=df_vehicle.loc['单年维修费',year],discount_rate=df_vehicle_om.loc['折现率',year],vehicle_life=vehicle_life,workday_ratio=df_vehicle_om.loc['工作日占比',year],workhour_per_driver=df_vehicle_om.loc['单人工作时间',year],number_of_driver=df_vehicle_om.loc['司机人数',year],driver_salary_per_month=driver_salary_per_month,average_speed=df_vehicle_om.loc['平均行驶速度',year],toll_per_km=df_vehicle_om.loc['通行费',year],toll_parameter=toll_parameter,tier_per_km=df_vehicle_om.loc['轮胎损耗',year],allowed_weight=df_vehicle_om.loc['额定总重',year],cold_month=df_trip_data.loc[trip,'寒冷月'],trip_length=df_trip_data.loc[trip,'距离'],freight_or_not=bool_of_zh[df_trip_data.loc[trip,'是否货运']],average_weight_price=df_trip_data.loc[trip,'单位运价'],average_income_per_trip=df_trip_data.loc[trip,'整车运价'],carbon_tax=carbon_tax,lang_ZH_or_not=lang_ZH_or_not,full_load_rate=full_load_rate,full_work_rate=full_work_rate)
             sa_economy_result.loc[bat]=lca_economy_mix
             sa_cost_mix_result.loc[bat]=cal_cost_percent(lca_economy_mix)
             sa_emission_result.loc[bat]=lca_emissions
