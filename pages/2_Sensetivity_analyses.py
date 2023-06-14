@@ -48,7 +48,7 @@ if fc_subs_perc>0:
 
 st.sidebar.markdown('## 3.氢价格')
 
-hydrogen_price=pd.read_excel('fuel\燃料成本.xlsx',sheet_name='燃料电池汽车',index_col=0).loc['低碳氢',range(2021,2031)].values
+hydrogen_price=pd.read_excel('fuel/燃料成本.xlsx',sheet_name='燃料电池汽车',index_col=0).loc['低碳氢',range(2021,2031)].values
 st.sidebar.markdown('终端氢价将从2021年的%.2f元/kg降至2030年的%.2f元/kg。'%(hydrogen_price[0],hydrogen_price[-1]))
 
 mod_hp = st.sidebar.checkbox('是否修改氢价?')
