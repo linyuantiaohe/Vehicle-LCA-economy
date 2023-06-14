@@ -26,6 +26,8 @@ ef_fuels,cost_fuels,charge_speeds=vlm.select_fuels()
 
 st.sidebar.markdown('# 选择敏感性分析基准值')
 
+st.sidebar.markdown('## 1.车型和工作量')
+
 selected_vehicle_type = st.sidebar.selectbox(
     '请选择要分析的车型',
     collected_vehicle_type)
@@ -33,6 +35,38 @@ selected_vehicle_type = st.sidebar.selectbox(
 df_ini_vehicle=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='运营参数',index_col=0)
 full_load_rate = st.sidebar.slider('选择平均负载率(100%为全部满载,0%为全部空载)', 0,100, int(df_ini_vehicle.loc['平均负载率',2021]))/100
 full_work_rate = st.sidebar.slider('选择行驶时间占比(扣除装卸货和接不到单时间)', 0,100, int(df_ini_vehicle.loc['行驶时间占比',2021]))/100
+
+st.sidebar.markdown('## 2.燃料电池汽车购置成本')
+
+cost_ini_vehicle=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='燃料电池汽车',index_col=0).loc['购置成本',range(2021,2031)]/10000
+
+st.sidebar.markdown('购置成本将从2021年的%.2f万元降至2030年的%.2f万元。'%(cost_ini_vehicle.iloc[0],cost_ini_vehicle.iloc[-1]))
+fc_subs_perc = st.sidebar.slider('可选择购置成本补贴比例(100%为全额补贴,0%为不补贴)', 0,100, 0)/100
+
+if fc_subs_perc>0:
+    st.sidebar.markdown('补贴后，购置成本将从2021年的%.2f万元降至2030年的%.2f万元。'%(cost_ini_vehicle.iloc[0]*(1-fc_subs_perc),cost_ini_vehicle.iloc[-1]*(1-fc_subs_perc)))
+
+st.sidebar.markdown('## 3.氢价格')
+
+hydrogen_price=pd.read_excel('fuel\燃料成本.xlsx',sheet_name='燃料电池汽车',index_col=0).loc['低碳氢',range(2021,2031)].values
+st.sidebar.markdown('终端氢价将从2021年的%.2f元/kg降至2030年的%.2f元/kg。'%(hydrogen_price[0],hydrogen_price[-1]))
+
+mod_hp = st.sidebar.checkbox('是否修改氢价?')
+if mod_hp:
+    hp21=st.sidebar.number_input('设置2021年氢价（元/kg）',0,hydrogen_price[0],hydrogen_price[0],format='%d')
+    if hp21>0:
+        hp30=st.sidebar.number_input('设置2030年氢价（元/kg）',0,hp21,min(hydrogen_price[-1],hp21),format='%d')
+    else:
+        hp30=0
+    hydrogen_price=np.linspace(hp21,hp30,10)
+
+cost_fuels.loc['燃料电池汽车',range(2021,2031)]=hydrogen_price
+cost_fuels.loc['燃料电池汽车',range(2031,2035)]=hydrogen_price[-1]
+
+st.markdown('**燃料价格**')
+st.write(cost_fuels)
+
+st.sidebar.markdown('## 4.工资、过路费、碳价格等外生因素')
 
 driver_salary_per_month = st.sidebar.checkbox('是否考虑司机工资?')
 if driver_salary_per_month:
@@ -47,12 +81,21 @@ if selected_vehicle_type=='4.5吨冷链车':
     if cold_truck_toll:
         toll_parameter=0
 
+if toll_parameter:
+    hydrogen_toll=st.sidebar.slider('选择燃料电池车的高速通行费:元/km', 0, int(df_ini_vehicle.loc['通行费',2021]), int(df_ini_vehicle.loc['通行费',2021]))
+
+selected_carbon_tax = st.sidebar.number_input('设置碳税（元/吨）',0,10000,50,format='%d')
+
+st.sidebar.markdown('## 5.其它软件功能')
+
+selected_fuel = st.sidebar.multiselect('要对比哪几种类型？',['燃油汽车','电动汽车','燃料电池汽车'],['燃油汽车','电动汽车','燃料电池汽车'])
+
+st.sidebar.markdown('## 6.敏感性分析专用')
+
 selected_year = st.sidebar.slider('选择基准年份', 2021, 2030, 2021)
 
 df_trip_data=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='线路',index_col=0)
 selected_trip = st.sidebar.selectbox('请选一条基准线路',df_trip_data.index)
-
-selected_carbon_tax = st.sidebar.number_input('设置碳税（元/吨）,默认为50',0,10000,50,format='%d')
 
 df_hydrogen=pd.read_excel('./data/'+selected_vehicle_type+'.xlsx',sheet_name='燃料电池汽车',index_col=0)
 
@@ -63,7 +106,7 @@ st.markdown('基准氢耗:百公里%.2fkg'%df_hydrogen.loc['百公里能耗',sel
 sa_hydrogen_consum_rates=sa_rates*df_hydrogen.loc['百公里能耗',selected_year]
 
 ##函数使用
-compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=sa_hydrogen_consum_rates,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
+compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_consumption_rate_sensetivity_analysis(sa_consumption_rates=sa_hydrogen_consum_rates,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,hydrogen_toll=hydrogen_toll,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
 
 fig_sa_hydrogen_consumption_rate,ax_sa_hydrogen_consumption_rate=plt.subplots(figsize=(6,4))
 (sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_hydrogen_consumption_rate,label='燃料电池汽车')
@@ -87,7 +130,7 @@ st.markdown('基准动力电池容量:%.2fkWh'%(df_hydrogen.loc['动力电池容
 sa_hydrogen_battery_capacity=sa_rates*(df_hydrogen.loc['动力电池容量',selected_year])
 
 ##函数使用
-compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=sa_hydrogen_battery_capacity,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
+compare_fuel_economy_result,compare_fuel_cost_mix_result,compare_fuel_emission_result,sa_economy_result,sa_cost_mix_result,sa_emission_result=vlm.hydrogen_battery_sensetivity_analysis(sa_batteery_capacity=sa_hydrogen_battery_capacity,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,hydrogen_toll=hydrogen_toll,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
 
 fig_sa_hydrogen_battery_capacity,ax_sa_battery_capacity=plt.subplots(figsize=(6,4))
 (sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_battery_capacity,label='燃料电池汽车')
@@ -123,10 +166,10 @@ for step in range(11):
         continue
 sa_hydrogen_capital_cost=np.array([step*i for i in range(23)])
 
-print(sa_hydrogen_capital_cost)
+#print(sa_hydrogen_capital_cost)
 
 ##函数使用
-cc_compare_fuel_economy_result,cc_compare_fuel_cost_mix_result,cc_compare_fuel_emission_result,cc_sa_economy_result,cc_sa_cost_mix_result,cc_sa_emission_result=vlm.capital_cost_sensetivity_analysis(sa_capital_cost=sa_hydrogen_capital_cost,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
+cc_compare_fuel_economy_result,cc_compare_fuel_cost_mix_result,cc_compare_fuel_emission_result,cc_sa_economy_result,cc_sa_cost_mix_result,cc_sa_emission_result=vlm.capital_cost_sensetivity_analysis(sa_capital_cost=sa_hydrogen_capital_cost,lang_ZH_or_not=True,carbon_tax=selected_carbon_tax,vehicle_type=selected_vehicle_type,year=selected_year,trip=selected_trip,toll_parameter=toll_parameter,hydrogen_toll=hydrogen_toll,driver_salary_per_month=driver_salary_per_month,full_load_rate=full_load_rate,full_work_rate=full_work_rate,ef_fuels=ef_fuels,cost_fuels=cost_fuels,charge_speeds=charge_speeds)
 
 fig_sa_hydrogen_capital_cost,ax_sa_hydrogen_capital_cost=plt.subplots(figsize=(6,4))
 (cc_sa_economy_result.sum(axis=1)/10000).plot(style='-o',ax=ax_sa_hydrogen_capital_cost,label='燃料电池汽车')
