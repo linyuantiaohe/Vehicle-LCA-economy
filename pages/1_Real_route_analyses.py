@@ -65,6 +65,13 @@ cost_fuels.loc['燃料电池汽车',range(2031,2035)]=hydrogen_price[-1]
 
 st.markdown('**燃料价格**')
 st.write(cost_fuels)
+csv_cost_fuels = vlm.convert_df(cost_fuels)
+
+st.download_button(
+    label="下载燃料价格数据(GB2312编码)",
+    data=csv_cost_fuels,
+    file_name='燃料价格.csv',
+    mime='text/csv')
 
 st.sidebar.markdown('## 4.工资、过路费、碳价格等外生因素')
 
