@@ -90,6 +90,8 @@ if selected_vehicle_type=='4.5吨冷链车':
 
 if toll_parameter:
     hydrogen_toll=st.sidebar.slider('选择燃料电池车的高速通行费:元/km', 0, int(df_ini_vehicle.loc['通行费',2021]), int(df_ini_vehicle.loc['通行费',2021]))
+else:
+    hydrogen_toll=0
 
 selected_carbon_tax = st.sidebar.number_input('设置碳税（元/吨）',0,10000,50,format='%d')
 
@@ -129,6 +131,8 @@ fig_tco,ax_tco=plt.subplots(figsize=(10,4))
 for vt in selected_fuel:
     df=(cost_mix_result/10000).loc[vt].T.sum()
     df.plot(style='-o',ax=ax_tco,label=vt)
+    st.markdown('**%s**'%vt)
+    st.write(df)
 ax_tco.set_ylabel('总拥有成本:万元',font=fpath)
 ax_tco.set_xlabel('',font=fpath)
 ax_tco.set_xticks(range(len(df.index)))

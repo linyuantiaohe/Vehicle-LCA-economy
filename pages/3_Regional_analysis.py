@@ -91,6 +91,8 @@ if selected_vehicle_type=='4.5吨冷链车':
 
 if toll_parameter:
     hydrogen_toll=st.sidebar.slider('选择燃料电池车的高速通行费:元/km', 0, int(df_ini_vehicle.loc['通行费',2021]), int(df_ini_vehicle.loc['通行费',2021]))
+else:
+    hydrogen_toll=0
 
 selected_carbon_tax = st.sidebar.number_input('设置碳税（元/吨）',0,10000,50,format='%d')
 
