@@ -127,11 +127,12 @@ st.download_button(
 st.markdown('### 1.2 不同路线下的成本结构')
 fig_tco,ax_tco=plt.subplots(figsize=(10,4))
 for vt in selected_fuel:
-    (cost_mix_result/10000).loc[vt].T.sum().plot(style='-o',ax=ax_tco,label=vt)
+    df=(cost_mix_result/10000).loc[vt].T.sum()
+    df.plot(style='-o',ax=ax_tco,label=vt)
 ax_tco.set_ylabel('总拥有成本:万元',font=fpath)
 ax_tco.set_xlabel('',font=fpath)
-ax_tco.set_xticks(range(11))
-ax_tco.set_xticklabels((cost_mix_result/10000).loc[vt].T.sum().index,fontproperties = ffp,rotation=45)
+ax_tco.set_xticks(range(len(df.index)))
+ax_tco.set_xticklabels(df.index,fontproperties = ffp,rotation=45)
 ax_tco.legend(loc='lower center',bbox_to_anchor=(0.5,-0.4),ncol=3,prop=ffp,frameon=False)
 st.pyplot(fig_tco)
 
