@@ -243,8 +243,8 @@ selected_hydrogen = st.multiselect('可选电源？',['低碳氢','电网电制�
 
 energy=year_emission_result/(ef_fuels.loc[:,range(2021,2031)])
 
-ev_ef=pd.read_excel('fuel\燃料碳排放强度.xlsx',sheet_name='电动汽车',index_col=0).loc[selected_electricity,range(2021,2031)]
-hv_ef=pd.read_excel('fuel\燃料碳排放强度.xlsx',sheet_name='燃料电池汽车',index_col=0).loc[selected_hydrogen,range(2021,2031)]
+ev_ef=pd.read_excel('fuel/燃料碳排放强度.xlsx',sheet_name='电动汽车',index_col=0).loc[selected_electricity,range(2021,2031)]
+hv_ef=pd.read_excel('fuel/燃料碳排放强度.xlsx',sheet_name='燃料电池汽车',index_col=0).loc[selected_hydrogen,range(2021,2031)]
 
 emissions=pd.DataFrame(0,index=['燃油汽车'],columns=range(2021,2031))
 emissions.loc['燃油汽车']=year_emission_result.loc['燃油汽车',range(2021,2031)]
