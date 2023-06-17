@@ -267,7 +267,7 @@ ax_emission_trend.set_xlabel('',font=fpath)
 ax_emission_trend.set_title('%s-%s-碳税%d元'%(selected_vehicle_type,selected_trip,selected_carbon_tax),font=fpath)
 ax_emission_trend.legend(title='',loc='lower center',bbox_to_anchor=(0.5,-0.35),prop=ffp,ncol=3,frameon=False)
 ax_emission_trend.set_xlim(2021,2030)
-ax_emission_trend.set_ylim(0,int(year_emission_result.max().max()/100)*100+100)
+ax_emission_trend.set_ylim(0,int(emissions.max().max()/100)*100+100)
 csv_emission_trend = vlm.convert_df(emissions)
 
 st.pyplot(fig_emission_trend)
